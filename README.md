@@ -76,14 +76,258 @@ Aquí abajo estarán los pasos a realizar para Windows y Mac (Linux en proceso)
 [^2]
 
 <p align="center">
-    <br>[<a href="/docs/ES/COMPILAR_WIN.md">Compilar en Windows (Sin modificaciones)</a>] | [<a href="/docs/ES/COMPILAR_MAC.md">Compilar en MacOS (Sin modificaciones)</a>] | <a href="/docs/ES/COMPILAR_LINUX.md">Compilar en Linux (Sin modificaciones)(WIP)</a>
+    <br>
+    [<a href="/docs/ES/COMPILAR_WIN.md">Compilar en Windows (Sin modificaciones)</a>] | [<a href="/docs/ES/COMPILAR_MAC.md">Compilar en MacOS (Sin modificaciones)</a>] | [<a href="/docs/ES/COMPILAR_LINUX.md">Compilar en Linux (Sin modificaciones)(WIP)</a>] *
+    <br>
+    <i font-size:"10">*Estos documentos redirigen al repositorio del cliente para administrador</i>
 </p>
 
+# Cambios al código original
+
+A partir de aquí se asume el directorio principal, o 'base', aquel donde se descargue RustDesk, por defecto 'C/rustdesk/'.
+
+## Cambios generales
+
+Cambios que van en todas las versiones (Act. Win & Mac)
+
+**`/src/lang/es.rs`** <br>
+Se corrige un error de traducción
+```rust
+("Untagged", "Sin etiquetar"), // El código original contiene "itiquetar"
+```
+
+**`/flutter/lib/desktop/pages/desktop_home_page.dart`**
+```dart
+// Añadir imports
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:http/http.dart' as http;
+
+// (...)
+
+class _DesktopHomePageState extends State<DesktopHomePage>
+
+    // (...)
+    @override
+    Widget build(BuildContext context) {
+        super.build(context);
+        final isIncomingOnly = bind.isIncomingOnly();
+        return _buildBlock(
+            child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            buildLeftPane(context),
+            if (!isIncomingOnly) const VerticalDivider(width: 1),
+            if (!isIncomingOnly) Expanded(child: buildCompanyPane(context)), // <-- NEW
+        ],
+        ));
+    }
+
+    // (...)
+
+    Widget buildLeftPane(BuildContext context) {
+        
+        // (...)
+        
+        return ChangeNotifierProvider.value(
+            value: gFFI.serverModel,
+            child: Container(
+                width: isIncomingOnly ? 490.0 : 190.0,          // Modificado
+                color: Theme.of(context).colorScheme.background,
+                child: Stack(
+                children: [
+                    Column(
+                    children: [
+                        SingleChildScrollView(
+                        controller: _leftPaneScrollController,
+                        child: Column(
+                            key: _childKey,
+                            children: children,
+                        ),
+                        ),
+                        //Expanded(child: Container())          // Comentado
+                    ],
+                    ),
+
+    // (...)
+    buildIDBoard(BuildContext context) {
+    final model = gFFI.serverModel;
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 11),
+      height: 57,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Container(
+            width: 2,
+            decoration: const BoxDecoration(color: MyTheme.accent),
+          ).marginOnly(top: 5),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 7),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 25,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          translate("ID"),
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.color
+                                  ?.withOpacity(0.5)),
+                        ).marginOnly(top: 5),
+                        //buildPopupMenu(context)  // <-- Comentado
+                      ],
+                    ),
+                  ),
+
+    // (...)
+     Widget buildHelpCards(String updateUrl) {
+    /**if (!bind.isCustomClient() &&                    // Comentado desde aquí
+        updateUrl.isNotEmpty &&
+        !isCardClosed &&
+        bind.mainUriPrefixSync().contains('rustdesk')) {
+      final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
+      String btnText = isToUpdate ? 'Update' : 'Download';
+      GestureTapCallback onPressed = () async {
+        final Uri url = Uri.parse('https://rustdesk.com/download');
+        await launchUrl(url);
+      };
+      if (isToUpdate) {
+        onPressed = () {
+          handleUpdate(updateUrl);
+        };
+      }
+      return buildInstallCard(
+          "Status",
+          "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
+          btnText,
+          onPressed,
+          closeButton: true,
+          help: isToUpdate ? 'Changelog' : null,
+          link: isToUpdate
+              ? 'https://github.com/rustdesk/rustdesk/releases/tag/${bind.mainGetNewVersion()}'
+              : null);
+    }**/                                                // Hasta aquí
+    if (systemError.isNotEmpty) {
+      return buildInstallCard("", systemError, "", () {});
+    }
+
+    if (isWindows && !bind.isDisableInstallation()) {
+      if (!bind.mainIsInstalled()) {
+        return buildInstallCard(
+            "", "" , "Install",                         // Modificado
+            () async {
+          await rustDeskWinManager.closeAllSubWindows();
+          bind.mainGotoInstall();
+        });
+      } else if (bind.mainIsInstalledLowerVersion()) {
+        return buildInstallCard(
+            "", "", "Click to upgrade",                 // Modificado
+            () async {
+          await rustDeskWinManager.closeAllSubWindows();
+          bind.mainUpdateMe();
+        });
+      }
+
+```
+
+**`/flutter/lib/common.dart`**
+```dart
+    // (...)
+    // ~ Ln. 2984
+    /// from local options
+  ServerConfig.fromOptions(Map<String, dynamic> options)
+      : idServer = options['<IP_SERVIDOR>'] ?? '',
+        relayServer = options['<IP_SERVIDOR>'] ?? '',
+        apiServer = options['https://<IP_SERVIDOR>'] ?? '',
+        key = options['<KEY_SERVIDOR>'] ?? '';
+
+
+    // (...)
+    // should set one by one
+    await bind.mainSetOption(
+        key: 'custom-rendezvous-server', value: '<IP_SERVIDOR>');
+    await bind.mainSetOption(key: 'relay-server', value: '<IP_SERVIDOR>');
+    await bind.mainSetOption(key: 'api-server', value: 'htps://<IP_SERVIDOR>');
+    await bind.mainSetOption(key: 'key', value: '<KEY_SERVIDOR>');
+```
+
+**`/libs/hbb_common/src/config.rs`**
+```rs
+// ~ Ln. 72
+lazy_static::lazy_static! {
+    // (...)
+    pub static ref APP_NAME: RwLock<String> = RwLock::new("<NombreDeApp>".to_owned());
+```
+
+**`/src/common.rs`**
+```rs
+
+
+    pub fn set_hardcoded_preset_password() {
+    let preset_password = "<CUSTOM_PASSWORD>";
+    let preset_salt = "<CUSTOM_SALT>";
+    let h1 = hbb_common::config::compute_permanent_password_h1(preset_password, preset_salt);
+    let storage = "00".to_owned() + &hbb_common::base64::encode(h1);
+
+    config::HARD_SETTINGS.write().unwrap()
+        .insert("password".to_owned(), storage);
+    config::HARD_SETTINGS.write().unwrap()
+        .insert("salt".to_owned(), preset_salt.to_owned());
+    config::BUILTIN_SETTINGS.write().unwrap()
+        .insert(
+            config::keys::OPTION_DISABLE_CHANGE_PERMANENT_PASSWORD.to_owned(),
+            "Y".to_owned(),
+        );
+    config::Config::set_permanent_password("");
+}
+```
+
+**`/src/core_main.rs`**
+```rs
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+pub fn core_main() -> Option<Vec<String>> {
+    if !crate::common::global_init() {
+        return None;
+    }
+    crate::load_custom_client();
+    crate::set_hardcoded_preset_password();         // Nuevo
+```
+
+
+**`src/flutter_ffi.rs`**
+```rs
+// ~ Ln. 52, dentro de la siguiente función:
+fn initialize(app_dir: &str, custom_client_config: &str){
+    // (...)
+    if custom_client_config.is_empty() {
+        crate::load_custom_client();
+    } else {
+        crate::read_custom_client(custom_client_config);
+    }
+    crate::set_hardcoded_preset_password();                    // Nuevo desde aquí
+    config::HARD_SETTINGS
+        .write()
+        .unwrap()
+        .insert("allow-remote-config-modification".to_owned(), "Y".to_owned()); // Hasta aquí
+```
+
+## Aplicar Cambios en Windows (WIP)
+### Cambios aplicados 
 
 
 
-
-
+## Aplicar Cambios en MacOS (WIP)
+### Cambios aplicados
 
 
 [^1]: External-link icon created by Dixit Lakhani_02 - Flaticon
