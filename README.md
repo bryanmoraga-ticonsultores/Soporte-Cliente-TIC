@@ -99,8 +99,7 @@ Se corrige un error de traducción
 **`/flutter/lib/desktop/pages/desktop_home_page.dart`**
 ```dart
 // Añadir imports
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:http/http.dart' as http;
+import 'support_request.dart';
 
 // (...)
 
@@ -117,7 +116,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
             buildLeftPane(context),
             if (!isIncomingOnly) const VerticalDivider(width: 1),
-            if (!isIncomingOnly) Expanded(child: buildCompanyPane(context)), // <-- NEW
+        if (!isIncomingOnly) Expanded(child: CompanyPane()), // <-- NEW
         ],
         ));
     }
@@ -324,7 +323,42 @@ fn initialize(app_dir: &str, custom_client_config: &str){
 ## Aplicar Cambios en Windows (WIP)
 ### Cambios aplicados 
 
+En esta sección se especifican los cambios realizados para el cliente RustDesk que se hicieron en Windows con efecto de personalizar y/o adaptar el software RustDesk a necesidades específicas.
 
+Para los íconos, véase en el Readme de la versión de Administrador [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/README.md#aplicar-cambios-en-windows)
+
+**`build.py`**
+```py
+def build_flutter_windows(version, features, skip_portable_pack):
+    # (...)
+    # ~ Ln. 456
+    system2(
+        f'python3 ./generate.py -f ../../{flutter_build_dir_2} -o . -e ../../{flutter_build_dir_2}/Soporte_Remoto.exe')
+    # (...)
+    os.rename('./rustdesk_portable.exe', f'./Soporte_Remoto-{version}-install.exe')
+    print(
+        f'output location: {os.path.abspath(os.curdir)}/Soporte_Remoto-{version}-install.exe')
+```
+
+
+**`Cargo.toml`**
+```toml
+[package]
+name = "rustdesk"
+version = "1.4.9"
+authors = ["rustdesk <info@rustdesk.com> TiConsultores <soporte@ticonsultores.cl>"] # Modificado
+edition = "2021"
+build= "build.rs"
+description = "Soporte Remoto TiConsultores"    # Modificado
+default-run = "rustdesk"
+rust-version = "1.75"
+#(...)
+[package.metadata.winres]
+LegalCopyright = "Copyright © 2026 Purslane Tech Pte. Ltd. Modifications by TiConsultores SpA. All rights reserved."
+ProductName = "Soporte_Remoto"
+FileDescription = "Soporte Remoto TiConsultores"
+OriginalFilename = "soporte_remoto.exe"
+```
 
 ## Aplicar Cambios en MacOS (WIP)
 ### Cambios aplicados
