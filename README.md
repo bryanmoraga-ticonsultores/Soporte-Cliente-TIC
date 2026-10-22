@@ -323,6 +323,8 @@ fn initialize(app_dir: &str, custom_client_config: &str){
 ```
 
 ### Cambios Originales (WIP)
+----
+
 
 
 ## Aplicar Cambios en Windows
