@@ -28,9 +28,31 @@ Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-tico
 - Términos de Uso [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/terms.html)
 - Términos de Privacidad [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/privacy.html)
 
-<br>Versiones Específicas:<br>
+<br>Versiones Específicas: (WIP)<br>
 
-(:::)
+- RustDesk: <br>
+  commit <`TBD`> `Windows`<br>
+commit <`TBD`> `MacOS`
+
+(Win)
+```bash
+TBD
+``` 
+(Mac)
+```bash
+TBD
+```
+
+- hbb_common: <br> commit <`TBD`> `Windows` <br> commit <`TBD`> `MacOs`
+
+(Win)
+```bash
+libs/hbb_common (<TBD>)
+```
+(Mac)
+```bash
+libs/hbb_common (<TBD>)
+```
 
 Para esto se necesitaría seguir las instrucciones del propio repositorio de rustdesk, que mencionaré aquí en caso de que cambien, para compilar la aplicación usando Flutter (No Sciter):
 
