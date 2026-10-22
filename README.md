@@ -13,11 +13,11 @@ WIP
 
     - 3.2 [Aplicar cambios en Windows](#aplicar-cambios-en-windows)
 
-    - 3.3 [Cambios aplicados (WIP)](#cambios-aplicados)
+    - 3.3 [Cambios aplicados](#cambios-aplicados)
     
-    - 3.4 [Aplicar cambios en MacOS (WIP)](#aplicar-cambios-en-macos)
+    - 3.4 [Aplicar cambios en MacOS](#aplicar-cambios-en-macos)
 
-    - 3.5 [Cambios aplicados (WIP)](#cambios-aplicados-1)
+    - 3.5 [Cambios aplicados](#cambios-aplicados-1)
 
 # Información
 # Soporte-Cliente-TIC
@@ -454,9 +454,56 @@ pub fn get_custom_client_staging_dir() -> PathBuf {
 ```
 
 
-## Aplicar Cambios en MacOS (WIP)
+## Aplicar Cambios en MacOS
 ### Cambios aplicados
 
+Los cambios aquí presentes son los que han sido aplicados con efecto de personalizar y/o adaptar el software RustDesk a necesidades específicas.
+
+Para los íconos, véase en el Readme de la versión de Administrador [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/README.md#aplicar-cambios-en-macos)
+
+**`/flutter/macos/Runner/Configs/AppInfo.xcconfig`**
+```
+PRODUCT_NAME = <NombreDeApp>
+PRODUCT_BUNDLE_IDENTIFIER = <tu.identificador.unico>
+PRODUCT_COPYRIGHT = Copyright © 2026 Purslane Tech Pte. Ltd. Modifications by TiConsultores SpA. All rights reserved.
+```
+> `<NombreDeApp>` no debe contener espacios, sólo caracteres alfanuméricos y guiones(`_`, `-`)
+
+**`/flutter/macos/Runner.xcodeproj/project.pbxproj`** — hay 3 ocurrencias hardcodeadas que sobreescriben al `.xcconfig` si no se cambian.
+<br>Con esto cambia esas 3 ocurrencias del archivo:
+```bash
+sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = com.carriez.rustdesk;/PRODUCT_BUNDLE_IDENTIFIER = <tu.identificador.unico>;/g' flutter/macos/Runner.xcodeproj/project.pbxproj
+```
+
+**`build.py`** Se agrega una función para obtener el nombre de la aplicación de forma dinámica.
+```python
+def get_mac_app_name():
+    xcconfig_path = 'flutter/macos/Runner/Configs/AppInfo.xcconfig'
+    with open(xcconfig_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('PRODUCT_NAME'):
+                name = line.split('=', 1)[1].strip()
+                return f'{name}.app'
+    raise Exception('No se encontró PRODUCT_NAME en AppInfo.xcconfig')
+```
+y se llama a esta función aquí:<br>
+(fragmento)
+```python
+def build_flutter_dmg(version, features):
+    ...
+
+    app_name = get_mac_app_name() # ← Aquí
+
+    os.chdir('flutter')
+    
+    mac_arch = 'arm64' if platform.machine().lower() in ('arm64', 'aarch64') else 'x86_64'
+    system2(
+        f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release')
+        # Para usarse aquí ↓
+    system2(f'cp -rf ../target/release/service "./build/macos/Build/Products/Release/{app_name}/Contents/MacOS/"') 
+    ...
+```
 
 [^1]: External-link icon created by Dixit Lakhani_02 - Flaticon
 [^2]: Por Larry Ewing (<a rel="nofollow" class="external text" href="mailto:lewing@isc.tamu.edu">lewing@isc.tamu.edu</a>) and <a href="https://en.wikipedia.org/wiki/GIMP" class="extiw" title="w:GIMP">The GIMP</a>, Attribution, <a href="https://commons.wikimedia.org/w/index.php?curid=753970">Enlace</a>
