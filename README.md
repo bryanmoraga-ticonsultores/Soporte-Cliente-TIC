@@ -8,8 +8,10 @@ WIP
 3. [Cambios al Código Original](#cambios-al-código-original)
 
     - 3.1 [Cambios Generales](#cambios-generales)
+  
+         - 3.1.1 [Cambios Originales](#cambios-originales)
 
-    - 3.2 [Aplicar cambios en Windows (WIP)](#aplicar-cambios-en-windows)
+    - 3.2 [Aplicar cambios en Windows](#aplicar-cambios-en-windows)
 
     - 3.3 [Cambios aplicados (WIP)](#cambios-aplicados)
     
@@ -320,7 +322,10 @@ fn initialize(app_dir: &str, custom_client_config: &str){
         .insert("allow-remote-config-modification".to_owned(), "Y".to_owned()); // Hasta aquí
 ```
 
-## Aplicar Cambios en Windows (WIP)
+### Cambios Originales (WIP)
+
+
+## Aplicar Cambios en Windows
 ### Cambios aplicados 
 
 En esta sección se especifican los cambios realizados para el cliente RustDesk que se hicieron en Windows con efecto de personalizar y/o adaptar el software RustDesk a necesidades específicas.
@@ -359,6 +364,71 @@ ProductName = "Soporte_Remoto"
 FileDescription = "Soporte Remoto TiConsultores"
 OriginalFilename = "soporte_remoto.exe"
 ```
+
+**`/flutter/windows/runner/main.cpp`**
+```cpp
+// ~ Ln. 66
+  std::wstring app_name = L"<NombreDeApp>";
+```
+
+**`/flutter/windows/runner/Runner.rc`**
+```rc
+// ~ Ln. 92 - 98
+        BEGIN
+            VALUE "CompanyName", "Purslane Tech Pte. Ltd. TiConsultores SpA." "\0"
+            VALUE "FileDescription", "Soporte Remoto" "\0" 
+            VALUE "FileVersion", VERSION_AS_STRING "\0"
+            VALUE "InternalName", "Nombre-de-App" "\0"
+            VALUE "LegalCopyright", "Copyright © 2026 Purslane Tech Pte. Ltd. Modifications by TiConsultores SpA. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Nombre-de-App.exe" "\0"
+            VALUE "ProductName", "Nombre-de-App" "\0"
+            VALUE "ProductVersion", VERSION_AS_STRING "\0"
+        END
+```
+
+**`/flutter/windows/CMakeLists.txt`**
+```txt
+# ~ Ln. 7
+set(BINARY_NAME "Nombre-de-App")
+```
+
+**`/libs/portable/Cargo.toml`** 
+```toml
+[package.metadata.winres]
+LegalCopyright = "<CopyrightDeApp>" # Esto es para efecto de clientes personalizados
+ProductName = "Nombre-de-App"
+OriginalFilename = "Nombre-de-App.exe"
+FileDescription = "NombreDeApp"
+```
+
+**`/libs/portable/generate.py`**
+```py
+
+# ~ Ln. 100
+    if not options.executable:
+        options.executable = 'Nombre-de-App.exe'
+```
+
+**`/src/platform/windows.rs`** <br>
+Correlación entre el nombre de la app y el nombre de las funciones.
+```rs
+// ~ Ln. 1992 - 1993
+#[inline]
+pub fn get_custom_client_staging_dir() -> PathBuf {
+    get_public_base_dir()
+        .join("NombreDeApp")
+        .join("NombreDeAppCustomClientStaging")
+}
+// (...)
+// ~ Ln. 3750
+                if file_name.starts_with("Nombre-de-")  // El comienzo del nombre de la app, no es necesario el nombre completo para distinguirlo de otros archivos.
+                    && (file_name.ends_with(".msi") || file_name.ends_with(".exe"))
+                {
+// (...)
+// ~ Ln. 3816
+     let caption = "Nombre de App Output"
+```
+
 
 ## Aplicar Cambios en MacOS (WIP)
 ### Cambios aplicados
