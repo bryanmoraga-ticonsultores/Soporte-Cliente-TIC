@@ -1,4 +1,3 @@
-WIP
 
 # Índice
 1. [Información](#información)
