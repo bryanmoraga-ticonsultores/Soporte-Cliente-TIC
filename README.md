@@ -28,30 +28,30 @@ Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-tico
 - Términos de Uso [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/terms.html)
 - Términos de Privacidad [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/privacy.html)
 
-<br>Versiones Específicas: (WIP)<br>
+<br>Versiones Específicas:<br>
 
-- RustDesk: <br>
-  commit <`TBD`> `Windows`<br>
-commit <`TBD`> `MacOS`
+- RustDesk: <br> commit <`6c578292e8ebbbec708b76986ba8c4bc7c509747`> `Windows`<br> commit <`91c9fccbb0f7bfe5f11644d5fbdec9b23fa10540`> `MacOS` 
 
 (Win)
 ```bash
-TBD
+6c578292e (HEAD, tag: 1.4.9) bump to 1.4.9
+1.4.9-0-g6c578292e
 ``` 
 (Mac)
 ```bash
-TBD
+91c9fccbb (HEAD -> master, origin/master, origin/HEAD) chore(deps): security bumps in Cargo.lock (RUSTSEC-2026 fixes) (#16143)
+nightly-177-g91c9fccbb
 ```
 
-- hbb_common: <br> commit <`TBD`> `Windows` <br> commit <`TBD`> `MacOs`
+- hbb_common: <br> commit <`69cea8dafee147848ae88702029f4bf7df7224c3`> `Windows` <br> commit <`29cf7cbe4d38ce36020749f713fb066299f02431`> `MacOs`
 
 (Win)
 ```bash
-libs/hbb_common (<TBD>)
+libs/hbb_common (driver-310-g69cea8d)
 ```
 (Mac)
 ```bash
-libs/hbb_common (<TBD>)
+libs/hbb_common (driver-390-g29cf7cb)
 ```
 
 Para esto se necesitaría seguir las instrucciones del propio repositorio de rustdesk, que mencionaré aquí en caso de que cambien, para compilar la aplicación usando Flutter (No Sciter):
