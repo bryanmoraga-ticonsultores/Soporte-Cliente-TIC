@@ -263,7 +263,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
 ```
 
-**`/flutter/lib/common.dart`**
+**`/flutter/lib/common.dart`** [^3]
 ```dart
     // (...)
     // ~ Ln. 2984
@@ -283,6 +283,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     await bind.mainSetOption(key: 'api-server', value: 'htps://<IP_SERVIDOR>');
     await bind.mainSetOption(key: 'key', value: '<KEY_SERVIDOR>');
 ```
+
+
 
 **`/libs/hbb_common/src/config.rs`**
 ```rs
@@ -507,3 +509,4 @@ def build_flutter_dmg(version, features):
 
 [^1]: External-link icon created by Dixit Lakhani_02 - Flaticon
 [^2]: Por Larry Ewing (<a rel="nofollow" class="external text" href="mailto:lewing@isc.tamu.edu">lewing@isc.tamu.edu</a>) and <a href="https://en.wikipedia.org/wiki/GIMP" class="extiw" title="w:GIMP">The GIMP</a>, Attribution, <a href="https://commons.wikimedia.org/w/index.php?curid=753970">Enlace</a>
+[^3]: Utilizo el símbolo '\~' para decir 'Alrededor'. E.g.: "\~ Ln. 84" sería: "Alrededor de la línea 84".
