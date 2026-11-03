@@ -318,7 +318,7 @@ lazy_static::lazy_static! {
     pub static ref APP_NAME: RwLock<String> = RwLock::new("<NombreDeApp>".to_owned());
 ```
 
-**`/src/common.rs`**
+**`/src/common.rs`** <br>
 Estos cambios son para usar el sistema de actualización automática del cliente y predefinir una contraseña preestablecida, a modo de facilitar el acceso en casos específicos. <br> *(Oficialmente **siempre** se pide que el usuario sea quien acepte, **no** se entrará jamás a un dispositivo sin la autorización explícita del usuario.)*
 ```rs
 pub fn check_software_update() {
