@@ -16,7 +16,7 @@ Versiones específicas:
 ## WINDOWS
 
 **`src/platform/windows.rs`** <br>
-Se añade el símbolo `_` Unicode *`(U+005F)`*, para funcionamiento de la actualización desde la versión anterior. 
+Se añade el símbolo `_` *(Unicode: `(U+005F)`*), para funcionamiento de la actualización desde la versión anterior. 
 ```rs
 fn validate_install_app_name(app_name: &str) -> ResultType<()> {
     if app_name.is_empty()
