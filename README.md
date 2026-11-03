@@ -24,9 +24,16 @@ Cliente Modificado de Rustdesk para solicitud de soporte remoto
 
 Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/rustdesk/rustdesk) [^1] (1.4.9) como base, añadiendo funcionalidades para el preste de servicios de soporte remoto. 
 
-**Para versiones recientes, véase** [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](/docs/CHANGELOG-ACT.md)
-> Los cambios aquí mencionados aplican igualmente, a menos que se indique lo contrario <br>
-> En cuyo caso, se especificará al principio del documento señalado y/o sección correspondiente de éste.
+----
+> [!TIP]
+> Actualización
+
+**Para versiones recientes, véase** [Documentación de Versión Actual](/docs/CHANGELOG-ACT.md) [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](/docs/CHANGELOG-ACT.md)
+
+> [!Important]
+> Los cambios mencionados en este README aplican igualmente, a menos que se indique lo contrario <br>
+> En cuyo caso, se especificará al principio del documento señalado y/o su sección correspondiente de éste.
+----
 
 - Términos de Uso [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/terms.html)
 - Términos de Privacidad [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/privacy.html)
