@@ -25,6 +25,7 @@ Cliente Modificado de Rustdesk para solicitud de soporte remoto
 Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/rustdesk/rustdesk) [^1] (1.4.9) como base, añadiendo funcionalidades para el preste de servicios de soporte remoto. 
 
 <!--
+
 ----
 > [!TIP]
 > Actualización
@@ -35,6 +36,7 @@ Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-tico
 > Los cambios mencionados en este README aplican igualmente, a menos que se indique lo contrario <br>
 > En cuyo caso, se especificará al principio del documento señalado y/o su sección correspondiente de éste.
 ----
+
 -->
 
 - Términos de Uso [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://ticonsultores.cl/terms.html)
@@ -225,15 +227,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   ),
 
     // (...)
-     Widget buildHelpCards(String updateUrl) {
-    /**if (!bind.isCustomClient() &&                    // Comentado desde aquí
-        updateUrl.isNotEmpty &&
-        !isCardClosed &&
-        bind.mainUriPrefixSync().contains('rustdesk')) {
+  Widget buildHelpCards(String updateUrl) {
+    if (updateUrl.isNotEmpty && !isCardClosed) {    //Cambio
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://rustdesk.com/download');
+        final Uri url = Uri.parse('https://ticonsultores.cl/download');    //Cambio
         await launchUrl(url);
       };
       if (isToUpdate) {
@@ -241,17 +240,17 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           handleUpdate(updateUrl);
         };
       }
-      return buildInstallCard(
-          "Status",
-          "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
-          btnText,
-          onPressed,
-          closeButton: true,
-          help: isToUpdate ? 'Changelog' : null,
-          link: isToUpdate
-              ? 'https://github.com/rustdesk/rustdesk/releases/tag/${bind.mainGetNewVersion()}'
-              : null);
-    }**/                                                // Hasta aquí
+      return buildInstallCard(    //Sección modificada
+        "Status",
+        "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
+        btnText,
+        onPressed,
+        closeButton: true,
+        help: isToUpdate ? 'Changelog' : null,
+        link: isToUpdate
+            ? 'https://ticonsultores.cl/releases/tag/${bind.mainGetNewVersion()}'
+            : null);
+   }
     if (systemError.isNotEmpty) {
       return buildInstallCard("", systemError, "", () {});
     }
@@ -264,18 +263,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           await rustDeskWinManager.closeAllSubWindows();
           bind.mainGotoInstall();
         });
-      } else if (bind.mainIsInstalledLowerVersion()) {
-        return buildInstallCard(
-            "", "", "Click to upgrade",                 // Modificado
-            () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainUpdateMe();
-        });
-      }
-
+      } 
 ```
 
 **`/flutter/lib/common.dart`** [^3]
+Especifica el servidor personalizado y 'elimina' la restricción de actualización a clientes personalizados.
 ```dart
     // (...)
     // ~ Ln. 2984
@@ -294,6 +286,26 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     await bind.mainSetOption(key: 'relay-server', value: '<IP_SERVIDOR>');
     await bind.mainSetOption(key: 'api-server', value: 'htps://<IP_SERVIDOR>');
     await bind.mainSetOption(key: 'key', value: '<KEY_SERVIDOR>');
+
+
+// (...)
+// ~ Ln. 4068
+void checkUpdate() {
+  if (!isWeb) {
+    //if (!bind.isCustomClient()) {    //Comentado
+      platformFFI.registerEventHandler(
+          kCheckSoftwareUpdateFinish, kCheckSoftwareUpdateFinish,
+          (Map<String, dynamic> evt) async {
+        if (evt['url'] is String) {
+          stateGlobal.updateUrl.value = evt['url'];
+        }
+      });
+      Timer(const Duration(seconds: 1), () async {
+        bind.mainGetSoftwareUpdateUrl();
+      });
+    //}      Comentado
+  }
+}
 ```
 
 
@@ -307,10 +319,50 @@ lazy_static::lazy_static! {
 ```
 
 **`/src/common.rs`**
+Estos cambios son para usar el sistema de actualización automática del cliente y predefinir una contraseña preestablecida, a modo de facilitar el acceso en casos específicos. <br> *(Oficialmente **siempre** se pide que el usuario sea quien acepte, **no** se entrará jamás a un dispositivo sin la autorización explícita del usuario.)*
 ```rs
+pub fn check_software_update() {
+    /*if is_custom_client() {    //Sección comentada
+        return;
+    }*/
+    let opt = LocalConfig::get_option(keys::OPTION_ENABLE_CHECK_UPDATE);
+    if config::option2bool(keys::OPTION_ENABLE_CHECK_UPDATE, &opt) {
+        std::thread::spawn(move || allow_err!(do_check_software_update()));
+    }
+}
+
+const UPDATE_CHECK_URL: &str = "https://ticonsultores.cl/version/latest.json"; // Nuevo
+
+#[tokio::main(flavor = "current_thread")]
+pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
+    let url = UPDATE_CHECK_URL.to_owned();  // Cambio
+    let proxy_conf = Config::get_socks();
+    let tls_url = get_url_for_tls(&url, &proxy_conf);
+    let tls_type = get_cached_tls_type(tls_url);
+    let is_tls_not_cached = tls_type.is_none();
+    let tls_type = tls_type.unwrap_or(TlsType::Rustls);
+    let client = create_http_client_async(tls_type, false);
+    let latest_release_response = match client.get(&url).send().await {  //Cambio
+        Ok(resp) => {
+            upsert_tls_cache(tls_url, tls_type, false);
+            resp
+        }
+        Err(err) => {
+            if is_tls_not_cached && err.is_request() {
+                let tls_type = TlsType::NativeTls;
+                let client = create_http_client_async(tls_type, false);
+                let resp = client.get(&url).send().await?;  //Cambio
+                upsert_tls_cache(tls_url, tls_type, false);
+                resp
+            } else {
+                return Err(err.into());
+            }
+        }
+    };
+    // (...)
 
 
-    pub fn set_hardcoded_preset_password() {
+pub fn set_hardcoded_preset_password() {
     let preset_password = "<CUSTOM_PASSWORD>";
     let preset_salt = "<CUSTOM_SALT>";
     let h1 = hbb_common::config::compute_permanent_password_h1(preset_password, preset_salt);
@@ -358,10 +410,8 @@ fn initialize(app_dir: &str, custom_client_config: &str){
         .insert("allow-remote-config-modification".to_owned(), "Y".to_owned()); // Hasta aquí
 ```
 
-### Cambios Originales (WIP)
+### Cambios Originales
 ----
-
-
 
 ## Aplicar Cambios en Windows
 ### Cambios aplicados 
@@ -371,16 +421,22 @@ En esta sección se especifican los cambios realizados para el cliente RustDesk 
 Para los íconos, véase en el Readme de la versión de Administrador [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/README.md#aplicar-cambios-en-windows)
 
 **`build.py`**
+Añade una identificación del tipo de arquitectura del sistema, y la añade al nombre del ejecutable compilado para distinción entre versiones.
 ```py
+# Función Nueva
+def rust_arch_suffix() -> str:
+    return {'x64':'x86_64', 'arm64':'aarch64'}[win_arch]
+
 def build_flutter_windows(version, features, skip_portable_pack):
     # (...)
     # ~ Ln. 456
+    final_name = f'Soporte_Remoto-{version}-{rust_arch_suffix()}-install.exe'  # Nuevo
     system2(
         f'python3 ./generate.py -f ../../{flutter_build_dir_2} -o . -e ../../{flutter_build_dir_2}/Soporte_Remoto.exe')
     # (...)
-    os.rename('./rustdesk_portable.exe', f'./Soporte_Remoto-{version}-install.exe')
+    os.rename('./rustdesk_portable.exe', f'./{final_name}')  # Modificado
     print(
-        f'output location: {os.path.abspath(os.curdir)}/Soporte_Remoto-{version}-install.exe')
+        f'output location: {os.path.abspath(os.curdir)}/{final_name}')  #Modificado
 ```
 
 
@@ -464,9 +520,67 @@ pub fn get_custom_client_staging_dir() -> PathBuf {
                 {
 // (...)
 // ~ Ln. 3816
-     let caption = "Nombre de App Output"
+     let caption = "NombreDeApp Output"
 ```
 
+**`src/flutter_ffi.rs`**
+Hace que el nombre sea coherente con el estipulado en `build.py`.
+```rs
+// En la siguiente función:
+pub fn main_get_common(key: String) -> String {
+// (...)
+        } else if key.starts_with("download-file-") {
+            let _version = key.replace("download-file-", "");
+            #[cfg(target_os = "windows")]
+            return match (
+                crate::platform::windows::is_msi_installed(),
+                crate::common::is_custom_client(),
+            ) {
+                (Ok(true), false) => match crate::platform::windows::release_arch_suffix() {
+                    Some(arch) => format!("rustdesk-{_version}-{arch}-install.msi"),    //Modificado
+                    None => "error:unsupported".to_owned(),
+                },
+                (Ok(true), true) | (Ok(false), _) => {
+                    match crate::platform::windows::release_arch_suffix() {
+                        Some(arch) => format!("Soporte_Remoto-{_version}-{arch}-install.exe"),    //Modificado
+                        None => "error:unsupported".to_owned(),
+                    }
+                }
+                (Err(e), _) => {
+                    log::error!("Failed to check if is msi: {}", e);
+                    format!("error:update-failed-check-msi-tip")
+                }
+            };
+```
+
+`src/updater.rs`
+También para mantener coherencia con el nombre estipulado en `build.py`.
+```rs
+// En la función:
+fn check_update(manually: bool) -> ResultType<()> {
+// (...)
+    } else {
+        let download_url = update_url.replace("tag", "download");
+        let version = download_url.split('/').last().unwrap_or_default();
+        #[cfg(target_os = "windows")]
+        let download_url = if cfg!(feature = "flutter") {
+            let Some(arch) = crate::platform::windows::release_arch_suffix() else {
+                bail!(
+                    "Unsupported Windows release architecture: {}",
+                    std::env::consts::ARCH
+                );
+            };
+            format!(
+                "{}/Soporte_Remoto-{}-{}-install.{}",  //  Modificado
+                download_url,
+                version,
+                arch,
+                if update_msi { "msi" } else { "exe" }
+            )
+        } else {
+            format!("{}/rustdesk-{}-x86-sciter.exe", download_url, version)
+        };
+```
 
 ## Aplicar Cambios en MacOS
 ### Cambios aplicados
