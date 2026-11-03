@@ -134,7 +134,7 @@ Se corrige un error de traducción
 ("Untagged", "Sin etiquetar"), // El código original contiene "itiquetar"
 ```
 
-**`/flutter/lib/desktop/pages/desktop_home_page.dart`**
+**`/flutter/lib/desktop/pages/desktop_home_page.dart`** <br>
 ```dart
 // Añadir imports
 import 'support_request.dart';
@@ -266,7 +266,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       } 
 ```
 
-**`/flutter/lib/common.dart`** [^3]
+**`/flutter/lib/common.dart`** [^3] <br>
 Especifica el servidor personalizado y 'elimina' la restricción de actualización a clientes personalizados.
 ```dart
     // (...)
@@ -420,7 +420,7 @@ En esta sección se especifican los cambios realizados para el cliente RustDesk 
 
 Para los íconos, véase en el Readme de la versión de Administrador [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/README.md#aplicar-cambios-en-windows)
 
-**`build.py`**
+**`build.py`** <br>
 Añade una identificación del tipo de arquitectura del sistema, y la añade al nombre del ejecutable compilado para distinción entre versiones.
 ```py
 # Función Nueva
@@ -523,7 +523,7 @@ pub fn get_custom_client_staging_dir() -> PathBuf {
      let caption = "NombreDeApp Output"
 ```
 
-**`src/flutter_ffi.rs`**
+**`src/flutter_ffi.rs`** <br>
 Hace que el nombre sea coherente con el estipulado en `build.py`.
 ```rs
 // En la siguiente función:
@@ -553,7 +553,7 @@ pub fn main_get_common(key: String) -> String {
             };
 ```
 
-`src/updater.rs`
+**`src/updater.rs`** <br>
 También para mantener coherencia con el nombre estipulado en `build.py`.
 ```rs
 // En la función:
