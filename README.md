@@ -28,7 +28,7 @@ Este proyecto toma a **RustDesk** [<img src="https://github.com/bryanmoraga-tico
 > [!TIP]
 > Actualización
 
-**Para versiones recientes, véase** [Documentación de Versión Actual](/docs/CHANGELOG-ACT.md) [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](/docs/CHANGELOG-ACT.md)
+**Para versiones recientes, véase** [Documentación para Versión Actual](/docs/CHANGELOG-ACT.md) [<img src="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/.img/external-link.png" alt="External Link" title="Abrir en una nueva pestaña" width="18" heigth="18">](/docs/CHANGELOG-ACT.md)
 
 > [!Important]
 > Los cambios mencionados en este README aplican igualmente, a menos que se indique lo contrario <br>
