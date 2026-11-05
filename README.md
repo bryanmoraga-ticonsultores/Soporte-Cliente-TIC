@@ -113,7 +113,7 @@ Aquí abajo estarán los pasos a realizar para Windows y Mac (Linux en proceso)
 
 <p align="center">
     <br>
-    [<a href="/docs/ES/COMPILAR_WIN.md">Compilar en Windows (Sin modificaciones)</a>] | [<a href="/docs/ES/COMPILAR_MAC.md">Compilar en MacOS (Sin modificaciones)</a>] | [<a href="/docs/ES/COMPILAR_LINUX.md">Compilar en Linux (Sin modificaciones)(WIP)</a>] *
+    [<a href="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/docs/ES/COMPILAR_WIN.md">Compilar en Windows (Sin modificaciones)</a>] | [<a href="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/docs/ES/COMPILAR_MAC.md">Compilar en MacOS (Sin modificaciones)</a>] | [<a href="https://github.com/bryanmoraga-ticonsultores/Soporte-Admin-TIC/blob/main/docs/ES/COMPILAR_LINUX.md">Compilar en Linux (Sin modificaciones)(WIP)</a>] *
     <br>
     <i font-size:"10">*Estos documentos redirigen al repositorio del cliente para administrador</i>
 </p>
