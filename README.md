@@ -100,7 +100,7 @@ Aquí abajo estarán los pasos a realizar para Windows y Mac (Linux en proceso)
 
 # Cambios al código original
 
-A partir de aquí se asume el directorio principal, o 'base', aquel donde se descargue RustDesk, por defecto 'C/rustdesk/'.
+A partir de aquí se asume el directorio principal, o 'base', aquel donde se descargue RustDesk, por defecto, para este caso; 'C/rustdesk/'.
 
 ## Cambios generales
 
@@ -236,7 +236,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     if (isWindows && !bind.isDisableInstallation()) {
       if (!bind.mainIsInstalled()) {
         return buildInstallCard(
-            "", "" , "Install",                         // Modificado
+            "", "" , "Install",                         // Modificado; Evito el bloque de texto
             () async {
           await rustDeskWinManager.closeAllSubWindows();
           bind.mainGotoInstall();
@@ -313,14 +313,14 @@ const UPDATE_CHECK_URL: &str = "https://ticonsultores.cl/version/latest.json"; /
 
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
-    let url = UPDATE_CHECK_URL.to_owned();  // Cambio
+    let url = UPDATE_CHECK_URL.to_owned();  // antes: version_check_request(...)
     let proxy_conf = Config::get_socks();
     let tls_url = get_url_for_tls(&url, &proxy_conf);
     let tls_type = get_cached_tls_type(tls_url);
     let is_tls_not_cached = tls_type.is_none();
     let tls_type = tls_type.unwrap_or(TlsType::Rustls);
     let client = create_http_client_async(tls_type, false);
-    let latest_release_response = match client.get(&url).send().await {  //Cambio
+    let latest_release_response = match client.get(&url).send().await {  // antes: post(&url).json(&request)
         Ok(resp) => {
             upsert_tls_cache(tls_url, tls_type, false);
             resp
@@ -329,7 +329,7 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
             if is_tls_not_cached && err.is_request() {
                 let tls_type = TlsType::NativeTls;
                 let client = create_http_client_async(tls_type, false);
-                let resp = client.get(&url).send().await?;  //Cambio
+                let resp = client.get(&url).send().await?;  // igual en el fallback NativeTls
                 upsert_tls_cache(tls_url, tls_type, false);
                 resp
             } else {
@@ -608,8 +608,65 @@ def build_flutter_dmg(version, features):
         f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release')
         # Para usarse aquí ↓
     system2(f'cp -rf ../target/release/service "./build/macos/Build/Products/Release/{app_name}/Contents/MacOS/"') 
-    ...
+    base_name = app_name[:-len('.app')]
+    app_path = f'./build/macos/Build/Products/Release/{app_name}'
+    # Firmar DESPUÉS de copiar `service` y ANTES de empaquetar
+    system2(f'codesign --force --deep --sign - "{app_path}"')
+    dmg_arch = 'aarch64' if mac_arch == 'arm64' else 'x86_64'
+    dmg_name = f'{base_name}-{version}-{dmg_arch}.dmg'
+    stage = './dmg_stage'
+    system2(f'rm -rf "{stage}" "{dmg_name}"')
+    system2(f'mkdir -p "{stage}" && ditto "{app_path}" "{stage}/{app_name}"')
+    system2(
+        f'create-dmg --volname "{base_name} Installer" --window-pos 200 120 --window-size 800 400 '
+        f'--icon-size 100 --app-drop-link 600 185 --icon "{app_name}" 200 190 '
+        f'--hide-extension "{app_name}" "{dmg_name}" "{stage}"')
+    system2(f'rm -rf "{stage}"')
+    os.replace(dmg_name, f'../{dmg_name}')
+    os.chdir("..")
 ```
+- `mac_arch` (`arm64`/`x86_64`) se traduce a `dmg_arch` (`aarch64`/`x86_64`) para que coincida con `flutter_ffi.rs.`
+- La carpeta intermedia garantiza que `Soporte_Cliente-TIC.app` quede en la raíz del volumen, que es lo que `extract_dmg_inner` copia.
+- `create-dmg` requiere `brew install create-dmg` y pide permiso de automatización de Finder a la Terminal. El aviso `hdiutil does not support internet-enable` es inofensivo.
+
+**`src/flutter_ffi.rs`**
+El nombre sale de `APP_NAME`, igual que el `.app` que `extract_dmg_inner` busca en el volumen.
+```rs
+#[cfg(target_os = "macos")]
+{
+    return if cfg!(target_arch = "x86_64") {
+        format!("{}-{_version}-x86_64.dmg", crate::get_app_name())
+    } else if cfg!(target_arch = "aarch64") {
+        format!("{}-{_version}-aarch64.dmg", crate::get_app_name())
+    } else {
+        "error:unsupported".to_owned()
+    };
+}
+```
+#### Requisitos de coherencia
+
+| Dato | Valor | Dónde debe coincidir |
+|---|---|---|
+| `PRODUCT_NAME` | `Soporte_Cliente-TIC` | `APP_NAME` (Rust), nombre del `.app`, ejecutable interior |
+| Ruta de instalación | `/Applications/Soporte_Cliente-TIC.app` | `is_installed()` y destino de `update_me` |
+| Nombre del `.dmg` | `Soporte_Cliente-TIC-<versión>-<arch>.dmg` | `build.py`, `flutter_ffi.rs`, servidor |
+| Contenido del `.dmg` | `.app` en la raíz del volumen | `extract_dmg_inner` |
+
+#### Verificación del `.dmg` antes de subirlo
+ 
+```bash
+hdiutil attach -nobrowse Soporte_Cliente-TIC-1.5.0-x86_64.dmg
+ls /Volumes/*/
+ls "/Volumes/Soporte_Cliente-TIC Installer/Soporte_Cliente-TIC.app/Contents/MacOS/"   # debe contener el ejecutable y `service`
+codesign --verify --deep --strict -v "/Volumes/Soporte_Cliente-TIC Installer/Soporte_Cliente-TIC.app"
+hdiutil detach "/Volumes/Soporte_Cliente-TIC Installer"
+```
+
+### Notas
+- La actualización en macOS es siempre manual (tarjeta → "Update"). `updater.rs` y `start_auto_update()` solo aplican a Windows.
+- La tarjeta muestra "Update" únicamente si la app corre desde `/Applications/Soporte_Cliente-TIC.app`; desde otra ruta mostrará "Download".
+- **Firma ad-hoc (`--sign -`):** es probable que cada actualización obligue a volver a conceder **Grabación de pantalla** y **Accesibilidad**. Firmar con Developer ID evitaría esto.
+- Un `.app` descargado desde el navegador lleva cuarentena y Gatekeeper lo bloquea la primera vez: clic derecho → Abrir, o `xattr -dr com.apple.quarantine /Applications/Soporte_Cliente-TIC.app`. El updater no tiene este problema porque `update_me` la elimina.
 
 [^1]: External-link icon created by Dixit Lakhani_02 - Flaticon
 [^2]: Por Larry Ewing (<a rel="nofollow" class="external text" href="mailto:lewing@isc.tamu.edu">lewing@isc.tamu.edu</a>) and <a href="https://en.wikipedia.org/wiki/GIMP" class="extiw" title="w:GIMP">The GIMP</a>, Attribution, <a href="https://commons.wikimedia.org/w/index.php?curid=753970">Enlace</a>
