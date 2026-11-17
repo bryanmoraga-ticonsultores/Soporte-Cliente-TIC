@@ -29,9 +29,3 @@ fn validate_install_app_name(app_name: &str) -> ResultType<()> {
     Ok(())
 }
 ```
-
-
-
-## MacOS (WIP)
-
-
